@@ -8,6 +8,7 @@
 
 ## File structure
 
+- `./crawler.py` &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # scrapper script
 - `./main.ipynb` &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # entire codebase
 - `./wiki/*` &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # html files from scrapping
 
