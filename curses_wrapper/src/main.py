@@ -44,6 +44,7 @@ class CursesUI:
     frame: Any = None
     tick: Any = None
     sig: Any = None
+    dev_mode = None
     vis_stage = 1
 
     @staticmethod
@@ -52,9 +53,17 @@ class CursesUI:
         curses.endwin()
         print(args)
 
+
+    @classmethod
+    def dev_mode(self, **kwargs):
+        self.__ruler_x_max = kwargs.get("x_max")
+        self.__ruler_y_max = kwargs.get("y_max")
+        CursesUI.dev_mode = True
+
+
     def __init__(self):
         self.__ruler_x_min, self.__ruler_x_max = 100, 100
-        self.__ruler_y_min, self.__ruler_y_max = 10, 100
+        self.__ruler_y_min, self.__ruler_y_max = 10, 10
 
         self.__status_uid = uuid4()
 
@@ -85,7 +94,11 @@ class CursesUI:
 
         curses.wrapper(main)
         self.__init_status()
-        self.__draw_grid()
+        self.__ruler_x_max = ((curses.LINES-4)//2)+7
+        self.__ruler_y_max = ((curses.COLS - 4)//4)+98
+
+        if CursesUI.dev_mode:
+            self.__draw_grid()
 
         while True:
             if CursesUI.sig == SIGWINCH:
@@ -173,9 +186,6 @@ class CursesUI:
         self.__entities_state.update({entity[0]: tuple(props)})
         return self
 
-    def add_ruler(self, x_max, y_max):
-        self.__ruler_x_max, self.__ruler_y_max = x_max, y_max
-        return self
 
     def add_stage(self, pl, ref=None):
         self.__create_stage(ref)
@@ -261,3 +271,8 @@ class CursesUI:
 
 screen = CursesUI()
 signal(SIGWINCH, screen.stop)
+
+
+def dev(**kwargs):
+    CursesUI.dev_mode(**kwargs)
+
