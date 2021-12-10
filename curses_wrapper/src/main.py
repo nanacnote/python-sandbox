@@ -44,7 +44,7 @@ class CursesUI:
     frame: Any = None
     tick: Any = None
     sig: Any = None
-    dev_mode = None
+    dev_mode: Any = None
     vis_stage = 1
 
     @staticmethod
@@ -53,12 +53,6 @@ class CursesUI:
         curses.endwin()
         print(args)
 
-
-    @classmethod
-    def dev_mode(self, **kwargs):
-        self.__ruler_x_max = kwargs.get("x_max")
-        self.__ruler_y_max = kwargs.get("y_max")
-        CursesUI.dev_mode = True
 
 
     def __init__(self):
@@ -111,6 +105,29 @@ class CursesUI:
                 self.__draw_frame()
                 curses.doupdate()
                 CursesUI.tick = False
+
+
+    def __init_status(self):
+        """
+        Adds initial status text at bottom of frame window
+        """
+        self.__create_entity(self.__status_uid)
+        entity = self.__cur_entity
+        props = list(entity)
+        props[EntityProps.X_CORD.value] = 4
+        props[EntityProps.Y_CORD.value] = curses.LINES-3
+        props[EntityProps.STAGE.value] = 0
+        self.__entities_state.update({entity[0]: tuple(props)})
+        return self
+
+
+    def _init_dev_mode(self, **kwargs):
+        """
+        Adds ruler markings to screen
+        """
+        self.__ruler_x_max = kwargs.get("x_max")
+        self.__ruler_y_max = kwargs.get("y_max")
+
 
     def __draw_grid(self):
         """
@@ -176,16 +193,6 @@ class CursesUI:
         if ref:
             self.__refs_state.update({ref: uid})
 
-    def __init_status(self):
-        self.__create_entity(self.__status_uid)
-        entity = self.__cur_entity
-        props = list(entity)
-        props[EntityProps.X_CORD.value] = 4
-        props[EntityProps.Y_CORD.value] = curses.LINES - 3
-        props[EntityProps.STAGE.value] = 0
-        self.__entities_state.update({entity[0]: tuple(props)})
-        return self
-
 
     def add_stage(self, pl, ref=None):
         self.__create_stage(ref)
@@ -224,15 +231,11 @@ class CursesUI:
         return self
 
     def to_ruler(self, x, y):
-        calc_x = (((x-self.__ruler_x_min)*100)//(self.__ruler_x_max -
-                  self.__ruler_x_min)*(curses.COLS-10))//100
-        calc_y = (((y-self.__ruler_y_min)*100)//(self.__ruler_y_max -
-                  self.__ruler_y_min)*(curses.LINES-10))//100
         entity = self.__entities_state.get(self.__cur_entity[0])
         if entity and entity[EntityProps.STAGE.value]:
             props = list(entity)
-            props[EntityProps.X_CORD.value] = calc_x
-            props[EntityProps.Y_CORD.value] = calc_y
+            props[EntityProps.X_CORD.value] = (((x-self.__ruler_x_min)*100)//(self.__ruler_x_max-self.__ruler_x_min)*(curses.COLS-10))//100
+            props[EntityProps.Y_CORD.value] = (((y-self.__ruler_y_min)*100)//(self.__ruler_y_max-self.__ruler_y_min)*(curses.LINES-10))//100
             self.__entities_state.update({entity[0]: tuple(props)})
         return self
 
@@ -269,10 +272,12 @@ class CursesUI:
         return self
 
 
+
 screen = CursesUI()
 signal(SIGWINCH, screen.stop)
 
 
 def dev(**kwargs):
-    CursesUI.dev_mode(**kwargs)
+    CursesUI.dev_mode = True
+    screen._init_dev_mode(**kwargs)
 
