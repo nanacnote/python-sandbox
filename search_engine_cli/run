@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# generate bytecode for dev debugging
+python -m dis src/main.py >bytecode/main.txt
+
+if [ "$1" = "boolean" ]; then
+    python -m src.main lowercase::num2word::nopunctuation nostopword::lemmatize::stem::bigram boolean
+fi
+
+if [ "$1" = "vector" ]; then
+    python -m src.main lowercase::num2word::nopunctuation nostopword::lemmatize::stem::bigram vector
+fi
+
+if [ -z "$1" ]; then
+    python -m src.main lowercase::num2word::nopunctuation nostopword::lemmatize::stem::bigram boolean
+fi

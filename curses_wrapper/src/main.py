@@ -10,17 +10,17 @@ from enum import Enum, unique
 
 @unique
 class StageProps(Enum):
-    NAME = 1
+    NAME=1
 
 
 @unique
 class EntityProps(Enum):
-    PAYLOAD = 1
-    STAGE = 2
-    X_CORD = 3
-    Y_CORD = 4
-    ATTRIBUTES = 5
-
+    PAYLOAD=1
+    STAGE=2
+    X_CORD=3
+    Y_CORD=4
+    ATTRIBUTES=5
+    TYPE=6
 
 class _dict(dict):
     def __setitem__(self, k, v):
@@ -96,7 +96,7 @@ class CursesUI:
 
         while True:
             if CursesUI.sig == SIGWINCH:
-                CursesUI.sig == None
+                CursesUI.sig = None
                 self.__loop.join()
                 break
 
@@ -163,12 +163,17 @@ class CursesUI:
         entites = set(self.__entities_state.values())
         for entity in entites:
             if entity[EntityProps.STAGE.value] == self.vis_stage:
-                CursesUI.content.addstr(
-                    entity[EntityProps.Y_CORD.value],
-                    entity[EntityProps.X_CORD.value],
-                    entity[EntityProps.PAYLOAD.value],
-                    entity[EntityProps.ATTRIBUTES.value]
-                )
+                if entity[EntityProps.TYPE.value] == 1:
+                    pass
+                elif entity[EntityProps.TYPE.value] == 2:
+                    pass
+                else:
+                    CursesUI.content.addstr(
+                        entity[EntityProps.Y_CORD.value],
+                        entity[EntityProps.X_CORD.value],
+                        entity[EntityProps.PAYLOAD.value],
+                        entity[EntityProps.ATTRIBUTES.value]
+                    )
                 CursesUI.content.noutrefresh()
 
     def __create_stage(self, ref):
@@ -187,12 +192,11 @@ class CursesUI:
         Initialises an entityents with base attributes
         """
         uid = uuid4()
-        self.__entities_state.update({uid: (uid, "...", 1, 0, 0, 0)})
+        self.__entities_state.update({uid: (uid, "...", 1, 0, 0, 0, 0)})
         self.__cur_entity = self.__entities_state[uid]
 
         if ref:
             self.__refs_state.update({ref: uid})
-
 
     def add_stage(self, pl, ref=None):
         self.__create_stage(ref)
@@ -218,6 +222,24 @@ class CursesUI:
         entity = self.__cur_entity
         props = list(entity)
         props[EntityProps.PAYLOAD.value] = pl
+        self.__entities_state.update({entity[0]: tuple(props)})
+        return self
+
+    def add_button(self, pl, ref):
+        self.__create_entity(ref)
+        entity = self.__cur_entity
+        props = list(entity)
+        props[EntityProps.PAYLOAD.value] = pl
+        props[EntityProps.TYPE.value] = 1
+        self.__entities_state.update({entity[0]: tuple(props)})
+        return self
+
+    def add_input(self, pl, ref):
+        self.__create_entity(ref)
+        entity = self.__cur_entity
+        props = list(entity)
+        props[EntityProps.PAYLOAD.value] = pl
+        props[EntityProps.TYPE.value] = 2
         self.__entities_state.update({entity[0]: tuple(props)})
         return self
 
@@ -263,13 +285,15 @@ class CursesUI:
         self.__entities_state.update({entity[0]: tuple(props)})
         return self
 
-    def update_str(self, pl, ref):
+    def update_entity(self, pl, ref):
         self.__cur_entity = self.__entities_state[self.__refs_state[ref]]
         entity = self.__cur_entity
         props = list(entity)
-        props[EntityProps.PAYLOAD.value] = pl
+        for tup in pl:
+            props[tup[0]] = tup[1]
         self.__entities_state.update({entity[0]: tuple(props)})
         return self
+
 
 
 

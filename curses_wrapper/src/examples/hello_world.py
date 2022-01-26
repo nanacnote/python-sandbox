@@ -12,7 +12,9 @@ if __name__ == "__main__":
     sleep(1)
     screen.add_str("second", 'data_2_ref').to_pos(10, 10).to_stage(1)
     sleep(1)
-    screen.update_str("new first", 'data_1_ref').with_attr(
-        A_REVERSE).to_ruler(60, 10)
+    screen.update_entity([(1, "new first")], 'data_1_ref').with_attr(
+        A_REVERSE)
     sleep(1)
     screen.update_status("data_1_ref change")
+    sleep(1)
+    screen.add_button("button", 'btn_ref_1').to_pos(0, 0).to_stage(1)
